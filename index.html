@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auxiliar de calificaciones</title>
+  <style>
+    body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0;padding:24px;color:#1f2937}
+    .container{max-width:1400px;margin:auto}
+    .card{background:#fff;border:1px solid #dbe1e8;border-radius:14px;padding:18px;margin-bottom:18px}
+    h1,h2{margin-top:0}
+    .grid{display:grid;gap:12px}
+    .grid-6{grid-template-columns:repeat(6,1fr)}
+    .grid-7{grid-template-columns:repeat(7,1fr)}
+    label{display:block;font-size:12px;color:#6b7280;margin-bottom:6px;text-transform:uppercase}
+    input,select{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px}
+    .pill{border:1px solid #cbd5e1;border-radius:12px;padding:10px;background:#f8fafc}
+    .tag{display:inline-block;padding:4px 8px;margin:2px;border-radius:999px;background:#e0f2fe;font-size:12px}
+    .toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+    button{padding:10px 14px;border:none;border-radius:10px;background:#111827;color:#fff;cursor:pointer}
+    table{width:100%;border-collapse:collapse;background:#fff}
+    th,td{border:1px solid #dbe1e8;padding:8px;text-align:center}
+    thead th{background:#f3f4f6}
+    .acd{background:#dff1cc}
+    .apex{background:#d8edc5}
+    .aaut{background:#cfe8b9}
+    .sum,.final,.estado{font-weight:bold}
+    .ok{background:#ecfdf5;color:#166534}
+    .rec{background:#fffbeb;color:#92400e}
+    .fail{background:#fef2f2;color:#991b1b}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <h1>Auxiliar de calificaciones</h1>
+    <p>Prototipo base para captura y validación de notas por ciclo.</p>
+  </div>
+
+  <div class="card">
+    <h2>Datos académicos</h2>
+    <div class="grid grid-6">
+      <div><label>Período</label><input value="SEPTIEMBRE 2025 - FEBRERO 2026"></div>
+      <div><label>Sede / Facultad</label><input value="SEDE ORELLANA"></div>
+      <div><label>Carrera</label><input value="TECNOLOGÍAS DE LA INFORMACIÓN"></div>
+      <div><label>Asignatura</label><input value="Gestión de Proyectos TI"></div>
+      <div><label>PAO</label><select><option>1</option><option selected>2</option></select></div>
+      <div><label>Ciclo</label><select><option>Medio ciclo</option><option selected>Fin de ciclo</option></select></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Trazabilidad RAC y RAAU</h2>
+    <div class="grid grid-7">
+      <div class="pill"><strong>Tareas en equipo</strong><div><span class="tag">RAC5</span><span class="tag">RAAU3</span></div></div>
+      <div class="pill"><strong>Tareas individuales</strong><div><span class="tag">RAC5</span><span class="tag">RAAU4</span></div></div>
+      <div class="pill"><strong>PI</strong><div><span class="tag">RAC5</span><span class="tag">RAAU3</span></div></div>
+      <div class="pill"><strong>IF</strong><div><span class="tag">RAC5</span><span class="tag">RAAU5</span></div></div>
+      <div class="pill"><strong>Exposición</strong><div><span class="tag">RAC5</span><span class="tag">RAAU5</span></div></div>
+      <div class="pill"><strong>Lectura comp.</strong><div><span class="tag">RAC5</span><span class="tag">RAAU3</span></div></div>
+      <div class="pill"><strong>Examen</strong><div><span class="tag">RAC5</span><span class="tag">RAAU5</span></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="toolbar">
+      <h2 style="margin:0">Registro de notas</h2>
+      <button onclick="addRow()">Añadir fila</button>
+    </div>
+
+    <table id="tabla">
+      <thead>
+        <tr>
+          <th colspan="4">Estudiante</th>
+          <th colspan="2" class="acd">ACD (3.5)</th>
+          <th colspan="3" class="apex">APEX (3.5)</th>
+          <th colspan="2" class="aaut">AAUT (3)</th>
+          <th rowspan="2">Sumatoria</th>
+          <th rowspan="2">Nota final</th>
+          <th rowspan="2">Estado</th>
+        </tr>
+        <tr>
+          <th>No.</th>
+          <th>Cédula</th>
+          <th>Apellidos</th>
+          <th>Nombres</th>
+          <th>Tareas equipo</th>
+          <th>Tareas individuales</th>
+          <th>PI</th>
+          <th>IF</th>
+          <th>Exposición</th>
+          <th>Lectura</th>
+          <th>Examen</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  const formato = new Intl.NumberFormat('es-EC', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  const ejemplo = [
+    {cedula:'0900000001', apellidos:'PÉREZ', nombres:'ANA', te:1.30, ti:1.70, pi:1.20, inf:0.90, ex:0.90, lec:0.40, eva:1.60},
+    {cedula:'0900000002', apellidos:'GÓMEZ', nombres:'LUIS', te:1.20, ti:1.50, pi:1.10, inf:0.80, ex:0.90, lec:0.30, eva:1.20}
+  ];
+
+  function addRow(data = {}) {
+    const tbody = document.getElementById('tbody');
+    const i = tbody.children.length + 1;
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${i}</td>
+      <td><input value="${data.cedula || ''}" oninput="recalcular()"></td>
+      <td><input value="${data.apellidos || ''}" oninput="recalcular()"></td>
+      <td><input value="${data.nombres || ''}" oninput="recalcular()"></td>
+      <td><input type="number" step="0.01" class="te" value="${data.te ?? 0}" oninput="recalcular()"></td>
+      <td><input type="number" step="0.01" class="ti" value="${data.ti ?? 0}" oninput="recalcular()"></td>
+      <td><input type="number" step="0.01" class="pi" value="${data.pi ?? 0}" oninput="recalcular()"></td>
+      <td><input type="number" step="0.01" class="inf" value="${data.inf ?? 0}" oninput="recalcular()"></td>
+      <td><input type="number" step="0.01" class="ex" value="${data.ex ?? 0}" oninput="recalcular()"></td>
+      <td><input type="number" step="0.01" class="lec" value="${data.lec ?? 0}" oninput="recalcular()"></td>
+      <td><input type="number" step="0.01" class="eva" value="${data.eva ?? 0}" oninput="recalcular()"></td>
+      <td class="sum">0,00</td>
+      <td class="final">0,00</td>
+      <td class="estado">Pendiente</td>
+    `;
+    tbody.appendChild(row);
+    recalcular();
+  }
+
+  function valor(input) {
+    const n = parseFloat(input.value);
+    return isNaN(n) ? 0 : n;
+  }
+
+  function recalcular() {
+    document.querySelectorAll('#tbody tr').forEach(tr => {
+      const acd = valor(tr.querySelector('.te')) + valor(tr.querySelector('.ti'));
+      const apex = valor(tr.querySelector('.pi')) + valor(tr.querySelector('.inf')) + valor(tr.querySelector('.ex'));
+      const aaut = valor(tr.querySelector('.lec')) + valor(tr.querySelector('.eva'));
+      const total = acd + apex + aaut;
+
+      tr.querySelector('.sum').textContent = formato.format(total);
+      tr.querySelector('.final').textContent = formato.format(total);
+
+      let estado = 'Alerta';
+      let clase = 'fail';
+
+      if (total >= 7) { estado = 'Aprobado'; clase = 'ok'; }
+      else if (total >= 3.99) { estado = 'Recuperación'; clase = 'rec'; }
+
+      const tdEstado = tr.querySelector('.estado');
+      tdEstado.textContent = estado;
+      tdEstado.className = 'estado ' + clase;
+    });
+  }
+
+  ejemplo.forEach(addRow);
+</script>
+</body>
+</html>
